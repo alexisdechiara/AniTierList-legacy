@@ -20,6 +20,7 @@ module.exports = {
 			},
 			shadow: {
 				aniShadowButton: "0 1px 10px 0 rgba(49,54,68,0.15)",
+				aniShadow: "0px 14px 30px rgba(103, 132, 187, 0.1), 0px 4px 4px rgba(103, 132, 187, 0.04)",
 			},
 		},
 	},

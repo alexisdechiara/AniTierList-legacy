@@ -351,6 +351,16 @@
   dependencies:
     tslib "^2.4.0"
 
+"@headlessui/vue@^1.7.3":
+  version "1.7.3"
+  resolved "https://registry.yarnpkg.com/@headlessui/vue/-/vue-1.7.3.tgz#116d13391552436ea1e9e88c69f0e9d7d2585c45"
+  integrity sha512-Is4iakKts9u9E0+jEZNzoJpBjwq2SamwEIoEl2RlyYSu6Zco536GsPXaQEfg/o7Eyc1GUUlcL+dJd4Rt7qyf7A==
+
+"@heroicons/vue@^2.0.12":
+  version "2.0.12"
+  resolved "https://registry.yarnpkg.com/@heroicons/vue/-/vue-2.0.12.tgz#45b97946731721269dd4141035af338a1ef88f35"
+  integrity sha512-ypuQl/Wei7BoShO65AdRVikXDaSt6hJBRuKs2pVd/6HvxfEz18oXraH+J5G/QPIwObMEVhMb6nkOs9l3WZv/gA==
+
 "@ioredis/commands@^1.1.1":
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/@ioredis/commands/-/commands-1.2.0.tgz#6d61b3097470af1fdbbe622795b8921d42018e11"
@@ -5002,6 +5012,11 @@ vue-bundle-renderer@^0.4.3:
   dependencies:
     ufo "^0.8.3"
 
+vue-color-kit@^1.0.5:
+  version "1.0.5"
+  resolved "https://registry.yarnpkg.com/vue-color-kit/-/vue-color-kit-1.0.5.tgz#4524be982078d4916756e480d2c9324717169738"
+  integrity sha512-PUQzqdpI7672YYuoHdTLENHldieVMis0u9g2n7NAxiLGdiaqCD/QaYtbDOvtASpN5oSIfKxQgPV+i45MOlkKnw==
+
 vue-demi@*:
   version "0.13.11"
   resolved "https://registry.yarnpkg.com/vue-demi/-/vue-demi-0.13.11.tgz#7d90369bdae8974d87b1973564ad390182410d99"
@@ -5018,6 +5033,11 @@ vue-router@^4.1.5:
   integrity sha512-IsvoF5D2GQ/EGTs/Th4NQms9gd2NSqV+yylxIyp/OYp8xOwxmU8Kj/74E9DTSYAyH5LX7idVUngN3JSj1X4xcQ==
   dependencies:
     "@vue/devtools-api" "^6.1.4"
+
+vue-tailwind-color-picker@^1.0.6:
+  version "1.0.6"
+  resolved "https://registry.yarnpkg.com/vue-tailwind-color-picker/-/vue-tailwind-color-picker-1.0.6.tgz#42014d74dd860afff7276b6420940797c27255b6"
+  integrity sha512-Ihe97uy9cdfb1s3oSQrC6CjN/VQjDg7O1GXP4IvwsKHyy9Zjp6Drrn8K0Rm55//MoZlWwLoGGdWj9INFL2hHTw==
 
 vue@^3.2.39:
   version "3.2.41"

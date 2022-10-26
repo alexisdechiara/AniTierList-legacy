@@ -5,7 +5,7 @@
 		</PopoverButton>
 
 		<PopoverPanel class="absolute left-[50px] top-0 z-20">
-			<ColorPicker v-show="showColorPicker" theme="light" :color="color" :colors-default="colorsDefault" sucker-hide @changeColor="changeColor" />
+			<ColorPicker class="box-content" v-show="showColorPicker" theme="light" :color="color" :colors-default="colorsDefault" sucker-hide @changeColor="changeColor" />
 		</PopoverPanel>
 	</Popover>
 </template>

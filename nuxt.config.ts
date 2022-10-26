@@ -1,3 +1,5 @@
+import ElementPlus from "unplugin-element-plus/vite";
+
 // https://v3.nuxtjs.org/api/configuration/nuxt.config
 export default defineNuxtConfig({
 	app: {
@@ -22,5 +24,12 @@ export default defineNuxtConfig({
 		// add '~tailwind.config` alias
 		exposeConfig: true,
 		viewer: true,
+	},
+	vite: {
+		plugins: [ElementPlus()],
+	},
+	// build
+	build: {
+		transpile: ["element-plus/es"],
 	},
 });

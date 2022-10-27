@@ -3,10 +3,10 @@
 		<div class="flex flex-col mx-32 px-[30px]">
 			<div class="flex flex-row items-end my-[40px] space-x-8">
 				<AniInput label="Search" disabled />
-				<AniSelect label="Genres" class="min-w-[150px]" disabled />
-				<AniSelect label="Year" class="min-w-[150px]" :options="years" v-model="filters.year" />
-				<AniSelect label="Season" class="min-w-[150px]" :options="seasons" v-model="filters.season" />
-				<AniSelect label="Format" class="min-w-[150px]" multiple :options="formats" v-model="filters.formats" />
+				<AniSelect label="Genres" disabled />
+				<AniSelect label="Year" :options="years" v-model="filters.year" />
+				<AniSelect label="Season" :options="seasons" v-model="filters.season" />
+				<AniSelect label="Format" multiple :options="formats" v-model="filters.formats" />
 
 				<Popover v-slot="{open}" class="relative">
 					<PopoverButton :class="{ 'text-aniPrimary': open }" class="flex items-center justify-center focus:text-aniPrimary hover:text-aniPrimary w-[38px] h-[38px] bg-aniWhite focus:outline-0 rounded-[6px] shadow-aniShadow grow shrink">
@@ -59,10 +59,10 @@
 			</div>
 			<div class="overflow-hidden rounded-[6px]">
 				<template v-for="tier in tiers" :key="tier.name">
-					<tier :name="tier.name" :color="tier.color" :entries="tier.entries" group="tier" transition />
+					<tier :name="tier.name" :color="tier.color" :entries="tier.entries" group="tier" transition :filters="filters" />
 				</template>
 			</div>
-			<tier class="mt-8" :entries="entries" group="tier" transition />
+			<tier class="mt-8" :entries="entries" group="tier" transition :filters="filters" />
 		</div>
 	</div>
 </template>
@@ -93,9 +93,7 @@ export default {
 	},
 	data() {
 		return {
-			tiers: [
-
-			],
+			tiers: [],
 			filters: {
 				year: '',
 				season: '',
@@ -157,46 +155,50 @@ export default {
 			seasons: [
 				{
 					label: 'Winter',
-					value: 'winter'
+					value: 'WINTER'
 				},
 				{
 					label: 'Spring',
-					value: 'spring'
+					value: 'SPRING'
 				},
 				{
 					label: 'Summer',
-					value: 'summer'
+					value: 'SUMMER'
 				},
 				{
 					label: 'Fall',
-					value: 'fall'
+					value: 'FALL'
 				}
 			],
 			years: [],
 			formats: [
 				{
 					label: 'TV Show',
-					value: 'tvShow',
+					value: 'TV',
 				},
 				{
 					label: 'Movie',
-					value: 'movie',
+					value: 'MOVIE',
 				},
 				{
 					label: 'TV Short',
-					value: 'tvShort',
+					value: 'TV_SHORT',
 				},
 				{
 					label: 'Special',
-					value: 'special',
+					value: 'SPECIAL',
 				},
 				{
 					label: 'OVA',
+					value: 'OVA',
+				},
+				{
+					label: 'ONA',
 					value: 'ONA',
 				},
 				{
 					label: 'Music',
-					value: 'music',
+					value: 'MUSIC',
 				},
 			],
 			drag: false,
@@ -230,6 +232,62 @@ export default {
 		},
 		removeFilteredFormat(index) {
 			this.filters.formats.splice(index, 1);
+		},
+		filterByRelationType(list, type) {
+			return list.filter(entry => !entry.media.relations.edges.some(edge => edge.relationType == type));
+		},
+		filterByScore(list, minScore, maxScore) {
+			return list.filter(entry => entry.score >= minScore && entry.score <= maxScore);
+		},
+		filterByYear(list, year) {
+			return list.filter(entry => entry.media.seasonYear === year);
+		},
+		filterBySeason(list, season) {
+			return list.filter(entry => entry.media.season === season);
+		},
+		filterByFormats(list, formats) {
+			return list.filter(entry => entry.media.formats.formats.some(entryFormat => formats.forEach(selectedFormat => entryFormat == selectedFormat)));
+		},
+		updateEntries() {
+			console.log(this.filters.year);
+			this.tiers.forEach(tier => {
+				if (this.filters.year != '') {
+					tier.entries = this.filterByYear(tier.entries, this.filters.year);
+				}
+
+				if (this.filters.season != '') {
+					tier.entries = this.filterBySeason(tier.entries, this.filters.season);
+				}
+
+				if (this.filters.formats.length > 0) {
+					tier.entries = this.filterByFormats(tier.entries, this.filters.year);
+				}
+			});
+
+			if (this.filters.year != '') {
+				this.entries = this.filterByYear(this.entries, this.filters.year);
+			}
+
+			if (this.filters.season != '') {
+				this.entries = this.filterBySeason(this.entries, this.filters.season);
+			}
+
+			if (this.filters.formats.length > 0) {
+				this.entries = this.filterByFormats(this.entries, this.filters.year);
+			}
+		},
+		autoSetEntries(list) {
+			list.forEach(entry => {
+				if (entry.score != 0) {
+					this.tiers.forEach(tier => {
+						if ((entry.score >= tier.range[0] && entry.score <= tier.range[1])) {
+							tier.entries.push(entry);
+						}
+					})
+				} else {
+					this.entries.push(entry);
+				}
+			});
 		}
 	},
 	computed: {
@@ -245,6 +303,10 @@ export default {
 									title {
 										userPreferred
 									}
+									format
+									season
+									seasonYear
+									genres
 									coverImage {
 										medium
 										large
@@ -254,6 +316,8 @@ export default {
 											relationType
 										}
 									}
+									status
+									siteUrl
 								}
 							}
 						}
@@ -280,19 +344,10 @@ export default {
 
 			const response = await fetch("https://graphql.anilist.co", options).then(response => response.json());
 			this.isLoaded = true;
-			let result = response.data.MediaListCollection.lists[0].entries;
-			let filtered = result.filter(entry => entry.score >= 0 && !entry.media.relations.edges.some(edge => edge.relationType == 'PREQUEL')).sort((a, b) => b.score - a.score);
-			filtered.forEach(entry => {
-				if (entry.score != 0) {
-					this.tiers.forEach(tier => {
-						if ((entry.score >= tier.range[0] && entry.score <= tier.range[1])) {
-							tier.entries.push(entry);
-						}
-					})
-				} else {
-					this.entries.push(entry);
-				}
-			});
+			let result = response.data.MediaListCollection.lists[0].entries.sort((a, b) => b.score - a.score);
+			let filtered = this.filterByRelationType(result, 'PREQUEL');
+			filtered = this.filterByScore(filtered, 0, 10);
+			this.autoSetEntries(filtered);
 		},
 	},
 };

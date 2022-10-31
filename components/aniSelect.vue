@@ -1,10 +1,9 @@
 <template>
   <AniLabel :text="label">
     <template #input>
-      <el-select v-model="value" @change="updateValue" :multiple="multiple" :disabled="disabled" :collapse-tags="multiple" class="min-w-[150px]" :clearable="!multiple" placeholder="Any">
+      <el-select v-model="value" @change="updateValue()" :multiple="multiple" :disabled="disabled" :collapse-tags="multiple" class="min-w-[150px]" :clearable="!multiple" placeholder="Any">
         <el-option class="capitalize" v-for="item in options" :key="item.value" :label="item.label" :value="item.value" />
       </el-select>
-      <!-- <select @change="updateValue" :class="[background == 'body' ? 'bg-aniBody' : 'bg-[#FBFBFB]', customClass != '' ?? customClass]" class="leading-aniLeading px-[15px] focus:outline-0 rounded-[6px] h-[40px] font-['Roboto']"> -->
     </template>
     </AniLabel>
 </template>
@@ -20,19 +19,19 @@ export default {
   },
   data() {
     return {
-      value: '',
+      value: "",
     };
   },
   props: {
     label: String,
     white: Boolean,
-    modelValue: String,
+    modelValue: Array,
     options: Array,
     multiple: Boolean,
     disabled: Boolean
   },
   methods: {
-    updateValue(event) {
+    updateValue() {
       this.$emit('update:modelValue', this.value);
     }
   },
@@ -60,7 +59,7 @@ export default {
 
 .el-input__inner {
   line-height: 40px;
-  font-weight: 600 !important;
+  font-weight: 600;
 }
 
 .el-select-dropdown__item {

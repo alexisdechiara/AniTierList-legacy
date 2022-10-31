@@ -1,13 +1,12 @@
 <template>
 	<div v-if="isLoaded" class="bg-aniBody h-full flex items-center justify-center py-16">
-		<div class="flex flex-col mx-32 px-[30px]">
+		<div class="flex flex-col mx-32 px-[30px] min-h-screen">
 			<div class="flex flex-row items-end my-[40px] space-x-8">
 				<AniInput label="Search" disabled />
 				<AniSelect label="Genres" disabled />
 				<AniSelect label="Year" :options="years" v-model="filters.year" />
 				<AniSelect label="Season" :options="seasons" v-model="filters.season" />
 				<AniSelect label="Format" multiple :options="formats" v-model="filters.formats" />
-
 				<Popover v-slot="{open}" class="relative">
 					<PopoverButton :class="{ 'text-aniPrimary': open }" class="flex items-center justify-center focus:text-aniPrimary hover:text-aniPrimary w-[38px] h-[38px] bg-aniWhite focus:outline-0 rounded-[6px] shadow-aniShadow grow shrink">
 						<el-icon :size="24" color="#afbfd1">
@@ -16,13 +15,24 @@
 					</PopoverButton>
 					<PopoverPanel class="flex flex-col absolute right-0 z-10 p-[40px] bg-aniWhite mt-[10px] rounded-[10px] shadow-aniShadow w-[800px]">
 						<Disclosure v-slot="{ open }">
-							<DisclosureButton class="flex flex-row pt-[30px] items-center font-semibold mb-[30px]">
-								<el-icon>
+							<DisclosureButton class="flex flex-row pt-[30px] items-center font-semibold mb-[15px]">
+								<el-icon :size="18">
 									<ArrowRightBold class="text-[#adc0d2] mr-[6px] transition duration-150 ease-in transform" :class="[open ? 'rotate-90' : 'rotate-0']" />
 								</el-icon>
 								<span class="font-[overpass] text-[16px] text-[#516170]">Tierlist settings</span>
 							</DisclosureButton>
 							<DisclosurePanel>
+								<div class="flex flex-row mb-[30px] items-end space-x-6">
+									<el-select class="aniBody" v-model="currentTemplate" @change="changeTiersTemplate(templates[currentTemplate])" placeholder="Template">
+										<el-option label="Logarithmic" :value="0" />
+										<el-option label="Linear" :value="1" />
+									</el-select>
+									<div class="flex flex-row items-end grow">
+										<el-button type="primary" class="grow" size="large" @click="setEntries(entries, true)">Auto rank anime</el-button>
+										<el-button type="danger" class="grow" size="large" @click="removeEntries">Unrank all anime</el-button>
+								
+									</div>
+								</div>
 								<template v-for="(tier, index) in tiers" :key="tier.name">
 									<div class="flex flex-row items-center space-x-6 mb-[10px]">
 										<el-button type="danger" class="aspect-1" @click="removeTier(index)">
@@ -58,11 +68,9 @@
 				</div>
 			</div>
 			<div class="overflow-hidden rounded-[6px]">
-				<template v-for="tier in tiers" :key="tier.name">
-					<tier :name="tier.name" :color="tier.color" :entries="tier.entries" group="tier" transition :filters="filters" />
-				</template>
+				<tier v-for="tier in tiers" :key="tier.name" :name="tier.name" :color="tier.color" :entries="tier.entries" group="tier" transition :filters="filters" />
 			</div>
-			<tier class="mt-8" :entries="entries" group="tier" transition :filters="filters" />
+			<tier class="mt-8" :entries="unRankedTier" group="tier" transition :filters="filters" />
 		</div>
 	</div>
 </template>
@@ -71,7 +79,7 @@
 import draggable from "vuedraggable";
 import { Popover, PopoverButton, PopoverPanel, Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/vue'
 import { Operation, DeleteFilled, ArrowRightBold, Plus } from '@element-plus/icons-vue'
-import { ElButton, ElIcon, ElTag } from "element-plus";
+import { ElButton, ElIcon, ElTag, ElSelect, ElOption } from "element-plus";
 
 export default {
 	name: "tierList",
@@ -88,69 +96,123 @@ export default {
 		ArrowRightBold,
 		Plus,
 		Operation,
+		ElSelect,
+		ElOption,
 		ElTag,
 		ElButton
 	},
 	data() {
 		return {
 			tiers: [],
+			unRankedTier: [],
 			filters: {
 				year: '',
 				season: '',
 				formats: []
 			},
-			templates: {
-				logarithmic: [
-					{
-						name: 'S+',
-						color: '#E13333',
-						range: [10, 10],
-						entries: []
-					},
-					{
-						name: 'S',
-						color: '#e58e2b',
-						range: [9.5, 9.9],
-						entries: []
-					},
-					{
-						name: 'A',
-						color: '#f9c62d',
-						range: [9, 9.4],
-						entries: []
-					},
-					{
-						name: 'B',
-						color: '#6ac75a',
-						range: [8.5, 8.9],
-						entries: []
-					},
-					{
-						name: 'C',
-						color: '#67aeed',
-						range: [8, 8.5],
-						entries: []
-					},
-					{
-						name: 'D',
-						color: '#6188E2',
-						range: [7, 7.9],
-						entries: []
-					},
-					{
-						name: 'E',
-						color: '#673AB7',
-						range: [5, 6.9],
-						entries: []
-					},
-					{
-						name: 'F',
-						color: '#2B2D42',
-						range: [0, 4.9],
-						entries: []
-					},
-				]
-			},
+			templates: [
+				{
+					label: 'logarithmic',
+					value: [
+						{
+							name: 'S+',
+							color: '#E13333',
+							range: [10, 10],
+							entries: []
+						},
+						{
+							name: 'S',
+							color: '#e58e2b',
+							range: [9.5, 9.9],
+							entries: []
+						},
+						{
+							name: 'A',
+							color: '#f9c62d',
+							range: [9, 9.4],
+							entries: []
+						},
+						{
+							name: 'B',
+							color: '#6ac75a',
+							range: [8.5, 8.9],
+							entries: []
+						},
+						{
+							name: 'C',
+							color: '#67aeed',
+							range: [8, 8.5],
+							entries: []
+						},
+						{
+							name: 'D',
+							color: '#6188E2',
+							range: [7, 7.9],
+							entries: []
+						},
+						{
+							name: 'E',
+							color: '#673AB7',
+							range: [5, 6.9],
+							entries: []
+						},
+						{
+							name: 'F',
+							color: '#2B2D42',
+							range: [0, 4.9],
+							entries: []
+						},
+					]
+				},
+				{
+					label: 'linear',
+					value: [
+						{
+							name: 'S',
+							color: '#E13333',
+							range: [10, 10],
+							entries: []
+						},
+						{
+							name: 'A',
+							color: '#e58e2b',
+							range: [9, 9.9],
+							entries: []
+						},
+						{
+							name: 'B',
+							color: '#f9c62d',
+							range: [8, 8.9],
+							entries: []
+						},
+						{
+							name: 'C',
+							color: '#6ac75a',
+							range: [7, 7.9],
+							entries: []
+						},
+						{
+							name: 'D',
+							color: '#67aeed',
+							range: [6, 6.9],
+							entries: []
+						},
+						{
+							name: 'E',
+							color: '#6188E2',
+							range: [5, 5.9],
+							entries: []
+						},
+						{
+							name: 'F',
+							color: '#673AB7',
+							range: [0, 4.9],
+							entries: []
+						},
+					]
+				}
+			],
+			currentTemplate: 0,
 			entries: [],
 			seasons: [
 				{
@@ -206,7 +268,7 @@ export default {
 		}
 	},
 	created() {
-		Object.assign(this.tiers, this.templates.logarithmic);
+		this.changeTiersTemplate(this.templates[this.currentTemplate]);
 		for (let index = new Date().getFullYear(); index >= 1940; index--) {
 			this.years.push({ label: index, value: index });
 		}
@@ -214,11 +276,11 @@ export default {
 	},
 	methods: {
 		removeTier(index) {
-			this.entries.push(...this.tiers[index].entries);
+			this.unRankedTier.push(...this.tiers[index].entries);
 			this.tiers.splice(index, 1);
 		},
 		addTier() {
-			if (this.tiers.length >= this.templates.logarithmic.length) {
+			if (this.tiers.length >= this.templates[this.currentTemplate].value.length) {
 				let newTier = {
 					name: 'New tier',
 					color: '#2B2D42',
@@ -227,8 +289,14 @@ export default {
 				}
 				this.tiers.push(newTier);
 			} else {
-				this.tiers.push(this.templates.logarithmic[this.tiers.length]);
+				this.tiers.push(this.templates[this.currentTemplate].value[this.tiers.length]);
 			}
+		},
+		removeEntries() {
+			this.tiers.forEach(tier => {
+				this.unRankedTier.push(...tier.entries);
+				tier.entries = [];
+			})
 		},
 		removeFilteredFormat(index) {
 			this.filters.formats.splice(index, 1);
@@ -248,46 +316,25 @@ export default {
 		filterByFormats(list, formats) {
 			return list.filter(entry => entry.media.formats.formats.some(entryFormat => formats.forEach(selectedFormat => entryFormat == selectedFormat)));
 		},
-		updateEntries() {
-			console.log(this.filters.year);
-			this.tiers.forEach(tier => {
-				if (this.filters.year != '') {
-					tier.entries = this.filterByYear(tier.entries, this.filters.year);
-				}
-
-				if (this.filters.season != '') {
-					tier.entries = this.filterBySeason(tier.entries, this.filters.season);
-				}
-
-				if (this.filters.formats.length > 0) {
-					tier.entries = this.filterByFormats(tier.entries, this.filters.year);
-				}
-			});
-
-			if (this.filters.year != '') {
-				this.entries = this.filterByYear(this.entries, this.filters.year);
-			}
-
-			if (this.filters.season != '') {
-				this.entries = this.filterBySeason(this.entries, this.filters.season);
-			}
-
-			if (this.filters.formats.length > 0) {
-				this.entries = this.filterByFormats(this.entries, this.filters.year);
-			}
-		},
-		autoSetEntries(list) {
+		setEntries(list, auto) {
 			list.forEach(entry => {
-				if (entry.score != 0) {
+				if (entry.score != 0 && auto) {
 					this.tiers.forEach(tier => {
 						if ((entry.score >= tier.range[0] && entry.score <= tier.range[1])) {
 							tier.entries.push(entry);
 						}
 					})
 				} else {
-					this.entries.push(entry);
+					this.unRankedTier.push(entry);
 				}
 			});
+		},
+		changeTiersTemplate(template) {
+			if (this.tiers.length > 0) {
+				this.tiers.forEach(tier => this.unRankedTier.push(...tier.entries));
+				this.tiers = [];
+			}
+			this.tiers = Array.from(template.value);
 		}
 	},
 	computed: {
@@ -344,10 +391,14 @@ export default {
 
 			const response = await fetch("https://graphql.anilist.co", options).then(response => response.json());
 			this.isLoaded = true;
-			let result = response.data.MediaListCollection.lists[0].entries.sort((a, b) => b.score - a.score);
-			let filtered = this.filterByRelationType(result, 'PREQUEL');
-			filtered = this.filterByScore(filtered, 0, 10);
-			this.autoSetEntries(filtered);
+			let result = response.data.MediaListCollection.lists[0].entries;
+			this.entries = result.sort((a, b) => b.score - a.score);
+			let minScore = 0, maxScore = 10;
+			if (route.query.seasons == null) this.entries = this.filterByRelationType(this.entries, 'PREQUEL');
+			if (route.query.min != null && route.query.min != 0 && route.query.min < 10) minScore = route.query.min;
+			if (route.query.max != null && route.query.max != 10 && route.query.max > minScore) maxScore = route.query.max;
+			this.entries = this.filterByScore(this.entries, minScore, maxScore);
+			this.setEntries(this.entries, route.query.auto != null ? true : false);
 		},
 	},
 };

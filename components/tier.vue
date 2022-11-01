@@ -1,8 +1,8 @@
 <template>
 	<div class="flex flex-row min-h-[150px]">
-		<div v-if="name != null" :style="'background-color:' + color" class="flex min-h-[150px] min-w-[150px] text-white justify-center items-center font-bold text-5xl"><span>{{name}}</span></div>
+		<div v-if="name != null" :style="'background-color:' + color" class="flex basis-auto min-h-[150px] min-w-[150px] max-w-fit text-white text-center justify-center items-center font-bold text-5xl">{{ name }}</div>
 		<draggable class="flex flex-wrap flex-row w-full" :group="group" :list="entries" item-key="media.id">
-			<template #item="{element}">
+			<template #item="{ element }">
 				<img v-show="checkYear(element.media.seasonYear) && checkSeason(element.media.season) && checkFormat(element.media.format)" class="flex aspect-[2/3] object-cover h-[150px]" :src="element.media.coverImage.medium" alt="">
 			</template>
 		</draggable>

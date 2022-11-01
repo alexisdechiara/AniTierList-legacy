@@ -2,28 +2,28 @@
 	<div v-if="isLoaded" class="bg-aniBody h-full flex items-center justify-center py-16">
 		<div class="flex flex-col mx-32 px-[30px] min-h-screen">
 			<div class="flex flex-row items-end my-[40px] space-x-8">
-				<AniInput label="Search" disabled />
+				<AniInput label="Search" disabled search clearable v-model="filters.search" />
 				<AniSelect label="Genres" disabled />
 				<AniSelect label="Year" :options="years" v-model="filters.year" />
 				<AniSelect label="Season" :options="seasons" v-model="filters.season" />
 				<AniSelect label="Format" multiple :options="formats" v-model="filters.formats" />
 				<Popover v-slot="{open}" class="relative">
-					<PopoverButton :class="{ 'text-aniPrimary': open }" class="flex items-center justify-center focus:text-aniPrimary hover:text-aniPrimary w-[38px] h-[38px] bg-aniWhite focus:outline-0 rounded-[6px] shadow-aniShadow grow shrink">
-						<el-icon :size="24" color="#afbfd1">
-							<Operation />
+					<PopoverButton :class="{ 'text-aniPrimary': open }" class="flex items-center justify-center w-[38px] h-[38px] bg-aniWhite focus:outline-0 rounded-[6px] shadow-aniShadow grow shrink">
+						<el-icon :size="24">
+							<Operation :class="[open ? 'text-aniPrimary' : 'text-[#afbfd1]']" class="stroke-2 focus:text-aniPrimary hover:text-aniPrimary" />
 						</el-icon>
 					</PopoverButton>
 					<PopoverPanel class="flex flex-col absolute right-0 z-10 p-[40px] bg-aniWhite mt-[10px] rounded-[10px] shadow-aniShadow w-[800px]">
-						<Disclosure v-slot="{ open }">
-							<DisclosureButton class="flex flex-row pt-[30px] items-center font-semibold mb-[15px]">
-								<el-icon :size="18">
+						<Disclosure :defaultOpen="true" v-slot="{ open }">
+							<DisclosureButton class="flex flex-row pt-[15px] items-center font-semibold mb-[15px]">
+								<el-icon :size="20">
 									<ArrowRightBold class="text-[#adc0d2] mr-[6px] transition duration-150 ease-in transform" :class="[open ? 'rotate-90' : 'rotate-0']" />
 								</el-icon>
 								<span class="font-[overpass] text-[16px] text-[#516170]">Tierlist settings</span>
 							</DisclosureButton>
 							<DisclosurePanel>
 								<div class="flex flex-row mb-[30px] items-end space-x-6">
-									<el-select class="aniBody" v-model="currentTemplate" @change="changeTiersTemplate(templates[currentTemplate])" placeholder="Template">
+									<el-select class="ani-select-template" v-model="currentTemplate" @change="changeTiersTemplate(templates[currentTemplate])" placeholder="Template">
 										<el-option label="Logarithmic" :value="0" />
 										<el-option label="Linear" :value="1" />
 									</el-select>
@@ -35,12 +35,12 @@
 								</div>
 								<template v-for="(tier, index) in tiers" :key="tier.name">
 									<div class="flex flex-row items-center space-x-6 mb-[10px]">
-										<el-button type="danger" class="aspect-1" @click="removeTier(index)">
+										<el-button type="danger" class="aspect-1" size="large" @click="removeTier(index)">
 											<el-icon>
 												<DeleteFilled />
 											</el-icon>
 										</el-button>
-										<AniInput class="shrink" background="body" v-model="tier.name" />
+										<AniInput class="shrink ani-input-tier" background="body" v-model="tier.name" />
 										<AniColorPicker v-model="tier.color" />
 										<AniMultiRangeSlider class="grow" v-model="tier.range" />
 									</div>

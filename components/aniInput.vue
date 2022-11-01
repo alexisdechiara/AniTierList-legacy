@@ -1,32 +1,41 @@
 <template>
   <AniLabel :text="label">
     <template #input>
-      <input :type="type" :disabled="disabled" :value="modelValue" @change="updateValue" :class="[background == 'body' ? 'bg-aniBody' : 'bg-[#FBFBFB] shadow-aniShadow', customClass != '' ?? customClass]" class="leading-aniLeading px-[15px] focus:outline-0 rounded-[6px] w-full min-w-[150px] font-['Roboto']" />
+      <el-input v-model="modelValue" @change="updateValue" @keyup.enter="updateValue" :disabled="disabled" :clearable="clearable">
+        <template v-if="search" #prefix>
+          <el-icon>
+            <search />
+          </el-icon>
+        </template>
+      </el-input>
     </template>
   </AniLabel>
 </template>
 
 <script>
+import { ElInput, ElIcon } from 'element-plus'
+import { Search } from '@element-plus/icons-vue'
+
 export default {
   name: "AniInput",
-  created() { },
+  components: {
+    ElInput,
+    ElIcon,
+    Search
+  },
   data() {
     return {};
   },
   props: {
     label: String,
-    customClass: String,
-    background: String,
     modelValue: String,
     disabled: Boolean,
-    type: {
-      type: String,
-      default: 'text'
-    },
+    search: Boolean,
+    clearable: Boolean
   },
   methods: {
     updateValue(event) {
-      setTimeout(() => this.$emit('update:modelValue', event.target.value), 0);
+      this.$emit('update:modelValue', this.modelValue);
     }
   },
 };

@@ -1,6 +1,6 @@
 <template>
-  <label>
-    <span v-if="text != null" class="block font-[overpass] text-[#516170] text-capitalize font-semibold text-base text-[15px] leading-[17px] py-[10px]">{{ text }}</span>
+  <label :for="linkedTo" :class="{ 'block font-[overpass] text-[#516170] text-capitalize font-semibold text-base text-[15px] leading-[17px] py-[10px]': linkedTo != null }">
+    <span v-if="text != null" class="block text-[#516170] text-capitalize font-semibold text-base text-[15px] leading-[17px] py-[10px]">{{ text }}</span>
     <slot name="input"></slot>
   </label>
 </template>
@@ -13,12 +13,9 @@ export default {
     return {};
   },
   props: {
-    text: String
+    text: String,
+    linkedTo: String
   },
   methods: {},
 };
 </script>
-
-<style lang="scss" scoped>
-
-</style>

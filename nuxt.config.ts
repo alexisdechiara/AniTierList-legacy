@@ -25,6 +25,7 @@ export default defineNuxtConfig({
 		exposeConfig: true,
 		viewer: true,
 	},
+	css: ["@/assets/scss/main.scss", "@/assets/scss/input.scss", "@/assets/scss/button.scss"],
 	vite: {
 		plugins: [ElementPlus()],
 	},

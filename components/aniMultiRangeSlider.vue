@@ -40,38 +40,40 @@ const marks = reactive<Marks>({
 });
 </script>
 
-<style>
-.el-slider__bar {
-	background-color: #cde7fe;
+<style lang="scss">
+.el-slider {
+	&__bar {
+		background-color: #cde7fe;
 		height: 10px;
 	}
-	
-	.el-slider__runway {
+
+	&__runway {
 		height: 10px;
 	}
-	
-	.el-slider__button {
+
+	&__button {
 		border: solid 0px;
 		background-color: #3db4f2;
 		border-radius: 6px;
 		height: 16px;
 		width: 16px;
 		margin-top: 4px;
+
+		&:hover {
+			transform: scale(1);
+		}
 	}
-	
-	.el-slider__button-wrapper+.el-slider__button-wrapper>.el-slider__button {
-		background-color: #3db4f2;
-		opacity: 0.7;
-	}
-	
-	.el-slider__button:hover {
-		transform: scale(1);
-	}
-	
-	.el-slider__stop {
+
+	&__stop {
 		background-color: #fafafa;
 		top: 1px;
 		height: 8px;
 		width: 8px;
+	}
+
+	&__button-wrapper+.el-slider__button-wrapper>.el-slider__button {
+		background-color: #3db4f2;
+		opacity: 0.7;
+	}
 }
 </style>

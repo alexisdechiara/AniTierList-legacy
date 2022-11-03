@@ -25,12 +25,12 @@ export default defineNuxtConfig({
 		exposeConfig: true,
 		viewer: true,
 	},
-	css: ["@/assets/scss/main.scss", "@/assets/scss/input.scss", "@/assets/scss/button.scss"],
+	css: ["@fortawesome/fontawesome-svg-core/styles.css", "@/assets/scss/main.scss", "@/assets/scss/input.scss", "@/assets/scss/button.scss", "@/assets/scss/dialog.scss"],
 	vite: {
 		plugins: [ElementPlus()],
 	},
 	// build
 	build: {
-		transpile: ["element-plus/es"],
+		transpile: ["element-plus/es", "@fortawesome/fontawesome-svg-core", "@fortawesome/free-brands-svg-icons"],
 	},
 });

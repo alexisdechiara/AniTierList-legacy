@@ -1,24 +1,20 @@
 <template>
-	<div v-if="isLoaded" class="bg-aniBody h-full flex items-center justify-center py-16">
-		<div class="flex flex-col mx-32 px-[30px] min-h-screen">
-			<div class="flex flex-row items-end my-[40px] space-x-8">
+	<div v-if="isLoaded" class="h-full flex items-center justify-center">
+		<div class="flex flex-col mx-32 px-[30px] min-h-screen max-h-full">
+			<div class="flex flex-row items-end my-[40px] space-x-6">
 				<AniInput label="Search" disabled search clearable v-model="filters.search" />
 				<AniSelect label="Genres" disabled />
 				<AniSelect label="Year" :options="years" v-model="filters.year" />
 				<AniSelect label="Season" :options="seasons" v-model="filters.season" />
 				<AniSelect label="Format" multiple :options="formats" v-model="filters.formats" />
-				<Popover v-slot="{open}" class="relative">
-					<PopoverButton :class="{ 'text-aniPrimary': open }" class="flex items-center justify-center w-[38px] h-[38px] bg-aniWhite focus:outline-0 rounded-[6px] shadow-aniShadow grow shrink">
-						<el-icon :size="24">
-							<Operation :class="[open ? 'text-aniPrimary' : 'text-[#afbfd1]']" class="stroke-2 focus:text-aniPrimary hover:text-aniPrimary" />
-						</el-icon>
+				<Popover v-slot="{open}" class="relative grow">
+					<PopoverButton :class="{ 'text-aniPrimary': open }" class="float-right flex items-center justify-center w-[38px] h-[38px] bg-aniWhite focus:outline-0 rounded-[6px] shadow-aniShadow grow shrink">
+						<font-awesome-icon icon="fas fa-sliders-h" :class="[open ? 'text-aniPrimary' : 'text-[#afbfd1]']" class="stroke-2 focus:text-aniPrimary hover:text-aniPrimary" />
 					</PopoverButton>
-					<PopoverPanel class="flex flex-col absolute right-0 z-10 p-[40px] bg-aniWhite mt-[10px] rounded-[10px] shadow-aniShadow w-[800px]">
+					<PopoverPanel class="flex flex-col absolute right-0 top-10 z-10 p-[40px] bg-aniWhite mt-[10px] rounded-[10px] shadow-aniShadow w-[800px]">
 						<Disclosure :defaultOpen="true" v-slot="{ open }">
 							<DisclosureButton class="flex flex-row pt-[15px] items-center font-semibold mb-[15px]">
-								<el-icon :size="20">
-									<ArrowRightBold class="text-[#adc0d2] mr-[6px] transition duration-150 ease-in transform" :class="[open ? 'rotate-90' : 'rotate-0']" />
-								</el-icon>
+								<font-awesome-icon icon="fa-chevron-right fa-w-10 fa-fw" class="text-[12px] text-[#adc0d2] -ml-[2px] mr-[6px] transition duration-150 ease-in transform" :class="[open ? 'rotate-90' : 'rotate-0']" />
 								<span class="font-[overpass] text-[16px] text-[#516170]">Tierlist settings</span>
 							</DisclosureButton>
 							<DisclosurePanel>
@@ -36,9 +32,7 @@
 								<template v-for="(tier, index) in tiers" :key="tier.name">
 									<div class="flex flex-row items-center space-x-6 mb-[10px]">
 										<el-button type="danger" class="aspect-1" size="large" @click="removeTier(index)">
-											<el-icon>
-												<DeleteFilled />
-											</el-icon>
+											<font-awesome-icon icon="fas fa-trash-alt" />
 										</el-button>
 										<AniInput class="shrink ani-input-tier" background="body" v-model="tier.name" />
 										<AniColorPicker v-model="tier.color" />
@@ -46,9 +40,7 @@
 									</div>
 								</template>
 								<el-button type="primary" class="w-full mt-[15px]" size="large" text bg @click="addTier">
-									<el-icon :size="20">
-										<Plus />
-									</el-icon>
+									<font-awesome-icon icon="fas fa-plus" />
 								</el-button>
 							</DisclosurePanel>
 						</Disclosure>
@@ -67,19 +59,24 @@
 					<el-tag v-for="format, index in filters.formats" :key="format.value" type="primary" closable effect="dark" @close="removeFilteredFormat(index)">{{ format }}</el-tag>
 				</div>
 			</div>
-			<div class="overflow-hidden rounded-[6px]">
-				<tier v-for="tier in tiers" :key="tier.name" :name="tier.name" :color="tier.color" :entries="tier.entries" group="tier" transition :filters="filters" />
-			</div>
-			<tier class="mt-8" :entries="unRankedTier" group="tier" transition :filters="filters" />
-		</div>
-	</div>
+			<div id="tierList" ref="tierList">
+				<div class="overflow-hidden rounded-[6px]">
+					<tier v-for="tier in tiers" :key="tier.name" :name="tier.name" :color="tier.color" :entries="tier.entries" group="tier" transition :filters="filters" />
+				</div>
+				<tier class="mt-8" :entries="unRankedTier" group="tier" transition :filters="filters" />
+				</div>
+				</div>
+				<SaveAsImage v-if="true" @click="downloadDialogVisible = true" />
+				<el-dialog v-model="downloadDialogVisible" destroy-on-close title="Right click > Save image as" fullscreen>
+					<div class="flex justify-center" id="downloadDialog"></div>
+				</el-dialog>
+				</div>
 </template>
 
 <script>
 import draggable from "vuedraggable";
+import { ElButton, ElTag, ElSelect, ElOption, ElDialog } from "element-plus";
 import { Popover, PopoverButton, PopoverPanel, Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/vue'
-import { Operation, DeleteFilled, ArrowRightBold, Plus } from '@element-plus/icons-vue'
-import { ElButton, ElIcon, ElTag, ElSelect, ElOption } from "element-plus";
 
 export default {
 	name: "tierList",
@@ -91,18 +88,15 @@ export default {
 		DisclosureButton,
 		DisclosurePanel,
 		PopoverPanel,
-		DeleteFilled,
-		ElIcon,
-		ArrowRightBold,
-		Plus,
-		Operation,
 		ElSelect,
 		ElOption,
 		ElTag,
-		ElButton
+		ElButton,
+		ElDialog
 	},
 	data() {
 		return {
+			downloadDialogVisible: ref(false),
 			tiers: [],
 			unRankedTier: [],
 			filters: {

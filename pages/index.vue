@@ -1,5 +1,5 @@
 <template>
-    <div class="bg-[#edf1f5] flex w-screen h-screen justify-center items-center">
+    <div class="bg-[#edf1f5] flex w-screen h-full justify-center items-center">
         <div class="bg-aniWhite rounded-aniRounded p-[50px] flex flex-col">
             <h1 class="text-2xl text-center text-[#5f7189] mb-[30px] mt-[20px] font-[Roboto] font-semibold">AniTierList</h1>
             <el-input v-model="username" class="mb-[15px] ani-input-username" placeholder="Username" @keyup.enter="enterClicked()">

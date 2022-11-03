@@ -3,9 +3,7 @@
     <template #input>
       <el-input v-model="modelValue" @change="updateValue" @keyup.enter="updateValue" :disabled="disabled" :clearable="clearable">
         <template v-if="search" #prefix>
-          <el-icon>
-            <search />
-          </el-icon>
+          <font-awesome-icon icon="fa-solid fa-search" />
         </template>
       </el-input>
     </template>
@@ -13,15 +11,11 @@
 </template>
 
 <script>
-import { ElInput, ElIcon } from 'element-plus'
-import { Search } from '@element-plus/icons-vue'
-
+import { ElInput } from 'element-plus'
 export default {
   name: "AniInput",
   components: {
-    ElInput,
-    ElIcon,
-    Search
+    ElInput
   },
   data() {
     return {};

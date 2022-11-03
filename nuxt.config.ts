@@ -16,9 +16,12 @@ export default defineNuxtConfig({
 					rel: "stylesheet",
 					href: "https://overpass-30e2.kxcdn.com/overpass.css",
 				},
+				{ rel: "icon", type: "image/x-icon", href: "/favicon.ico" },
+				{ rel: "icon", type: "image/png", href: "/favicon.png" },
 			],
 		},
 	},
+	ssr: false,
 	modules: ["@nuxtjs/tailwindcss"],
 	tailwindcss: {
 		// add '~tailwind.config` alias
@@ -32,5 +35,10 @@ export default defineNuxtConfig({
 	// build
 	build: {
 		transpile: ["element-plus/es", "@fortawesome/fontawesome-svg-core", "@fortawesome/free-brands-svg-icons"],
+	},
+	loadingIndicator: {
+		name: "pulse",
+		color: "#3ca5fc",
+		background: "#edf1f5",
 	},
 });

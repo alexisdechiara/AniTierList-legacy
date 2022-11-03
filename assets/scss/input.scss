@@ -37,10 +37,6 @@
 
 .el-input {
 
-  & select {
-    max-width: 170px;
-  }
-
   &__wrapper {
     align-items: center;
     --el-select-input-focus-border-color: none;

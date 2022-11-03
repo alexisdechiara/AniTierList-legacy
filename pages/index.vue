@@ -1,15 +1,13 @@
 <template>
-    <div class="bg-[#edf1f5] flex w-screen h-full justify-center items-center">
-        <div class="bg-aniWhite rounded-aniRounded p-[50px] flex flex-col">
-            <h1 class="text-2xl text-center text-[#5f7189] mb-[30px] mt-[20px] font-[Roboto] font-semibold">AniTierList</h1>
+    <div class="bg-[#edf1f5] flex flex-col w-full min-h-screen h-full justify-start items-center ">
+        <div class="bg-aniWhite rounded-aniRounded p-[50px] mt-[60px] flex flex-col w-full max-w-[400px]">
+            <h1 class="text-2xl text-center text-[#5f7189] mb-[30px] mt-[20px] font-[Roboto] font-semibold">AniTierList (UNOFFICIAL)</h1>
             <el-input v-model="username" class="mb-[15px] ani-input-username" placeholder="Username" @keyup.enter="enterClicked()">
                 <template #prefix>
-                    <el-icon>
-                        <search />
-                    </el-icon>
+                    <font-awesome-icon icon="fa-solid fa-search" />
                 </template>
             </el-input>
-            <el-switch inactive-text="Rank anime" active-text="Rank season" v-model="sequelRank" />
+            <el-switch class="w-full flex justify-center" inactive-text="Rank anime" active-text="Rank season" v-model="sequelRank" />
             <el-checkbox v-model="autoSetEntries" label="Auto rank anime" />
             <!-- <AniMultiRangeSlider class="mb-[15px] w-11/12 self-center" v-model="range"/> -->
             <el-button type="primary" size="large" @click="enterClicked()" class="ani-button-search" :disabled="username =='' ">Search</el-button>
@@ -17,8 +15,7 @@
     </div>
 </template>
 <script>
-import { ElButton, ElInput, ElSwitch, ElCheckbox, ElSlider, ElIcon } from "element-plus";
-import { Search } from '@element-plus/icons-vue'
+import { ElButton, ElInput, ElSwitch, ElCheckbox, ElSlider } from "element-plus";
 
 export default {
     name: "Homepage",
@@ -27,9 +24,7 @@ export default {
         ElInput,
         ElSwitch,
         ElCheckbox,
-        ElIcon,
         ElSlider,
-        Search
     },
     data() {
         return {

@@ -1,5 +1,9 @@
 <template>
-	<NuxtPage />
+	<div class="bg-aniBody">
+		<Header />
+		<NuxtPage />
+		<Footer />
+		</div>
 </template>
 
 <script setup>

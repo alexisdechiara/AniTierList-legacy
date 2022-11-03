@@ -1,7 +1,7 @@
 <template>
   <AniLabel :text="label">
     <template #input>
-      <el-select v-model="value" @change="updateValue()" :suffix-icon="ArrowDownBold" :clear-icon="CloseBold" :multiple="multiple" :disabled="disabled" :collapse-tags="multiple" class="min-w-[150px]" :clearable="!multiple" placeholder="Any">
+      <el-select v-model="value" @change="updateValue()" :suffix-icon="ArrowDownBold" :clear-icon="CloseBold" :multiple="multiple" :disabled="disabled" :collapse-tags="multiple" class="min-w-[150px] max-w-[170px]" :clearable="!multiple" placeholder="Any">
         <el-option class="capitalize" v-for="item in options" :key="item.value" :label="item.label" :value="item.value" />
       </el-select>
     </template>

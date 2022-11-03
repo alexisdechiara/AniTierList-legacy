@@ -1,5 +1,5 @@
 <template>
-	<div v-if="isLoaded" class="h-full flex items-center justify-center">
+	<div class="h-full flex items-center justify-center">
 		<div class="flex flex-col mx-32 px-[30px] min-h-screen max-h-full">
 			<div class="flex flex-row items-end my-[40px] space-x-6">
 				<AniInput label="Search" disabled search clearable v-model="filters.search" />
@@ -7,7 +7,7 @@
 				<AniSelect label="Year" :options="years" v-model="filters.year" />
 				<AniSelect label="Season" :options="seasons" v-model="filters.season" />
 				<AniSelect label="Format" multiple :options="formats" v-model="filters.formats" />
-				<Popover v-slot="{open}" class="relative grow">
+				<Popover v-if="isLoaded" v-slot="{open}" class="relative grow">
 					<PopoverButton :class="{ 'text-aniPrimary': open }" class="float-right flex items-center justify-center w-[38px] h-[38px] bg-aniWhite focus:outline-0 rounded-[6px] shadow-aniShadow grow shrink">
 						<font-awesome-icon icon="fas fa-sliders-h" :class="[open ? 'text-aniPrimary' : 'text-[#afbfd1]']" class="stroke-2 focus:text-aniPrimary hover:text-aniPrimary" />
 					</PopoverButton>
@@ -59,23 +59,25 @@
 					<el-tag v-for="format, index in filters.formats" :key="format.value" type="primary" closable effect="dark" @close="removeFilteredFormat(index)">{{ format }}</el-tag>
 				</div>
 			</div>
-			<div id="tierList" ref="tierList">
+			<div v-if="isLoaded && entries.length > 0" id="tierList">
 				<div class="overflow-hidden rounded-[6px]">
 					<tier v-for="tier in tiers" :key="tier.name" :name="tier.name" :color="tier.color" :entries="tier.entries" group="tier" transition :filters="filters" />
 				</div>
 				<tier class="mt-8" :entries="unRankedTier" group="tier" transition :filters="filters" />
-				</div>
-				</div>
-				<SaveAsImage v-if="true" @click="downloadDialogVisible = true" />
-				<el-dialog v-model="downloadDialogVisible" destroy-on-close title="Right click > Save image as" fullscreen>
-					<div class="flex justify-center" id="downloadDialog"></div>
-				</el-dialog>
-				</div>
+			</div>
+			<NuxtLoadingIndicator v-else-if="!isLoaded" />
+			<el-empty v-else description="No anime found, please check the username" />
+		</div>
+		<SaveAsImage v-if="true" @click="downloadDialogVisible = true" />
+		<el-dialog v-model="downloadDialogVisible" destroy-on-close title="Right click > Save image as" fullscreen>
+			<div class="flex justify-center" id="downloadDialog"></div>
+		</el-dialog>
+		</div>
 </template>
 
 <script>
 import draggable from "vuedraggable";
-import { ElButton, ElTag, ElSelect, ElOption, ElDialog } from "element-plus";
+import { ElButton, ElTag, ElSelect, ElOption, ElDialog, ElEmpty } from "element-plus";
 import { Popover, PopoverButton, PopoverPanel, Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/vue'
 
 export default {
@@ -92,7 +94,8 @@ export default {
 		ElOption,
 		ElTag,
 		ElButton,
-		ElDialog
+		ElDialog,
+		ElEmpty
 	},
 	data() {
 		return {

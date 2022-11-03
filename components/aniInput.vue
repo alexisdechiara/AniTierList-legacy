@@ -1,7 +1,7 @@
 <template>
   <AniLabel :text="label">
     <template #input>
-      <el-input v-model="modelValue" @change="updateValue" @keyup.enter="updateValue" :disabled="disabled" :clearable="clearable">
+      <el-input class="max-w-[170px]" v-model="modelValue" @change="updateValue" @keyup.enter="updateValue" :disabled="disabled" :clearable="clearable">
         <template v-if="search" #prefix>
           <font-awesome-icon icon="fa-solid fa-search" />
         </template>

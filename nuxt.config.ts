@@ -36,9 +36,4 @@ export default defineNuxtConfig({
 	build: {
 		transpile: ["element-plus/es", "@fortawesome/fontawesome-svg-core", "@fortawesome/free-brands-svg-icons"],
 	},
-	loadingIndicator: {
-		name: "pulse",
-		color: "#3ca5fc",
-		background: "#edf1f5",
-	},
 });

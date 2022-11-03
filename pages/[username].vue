@@ -65,7 +65,7 @@
 				</div>
 				<tier class="mt-8" :entries="unRankedTier" group="tier" transition :filters="filters" />
 			</div>
-			<NuxtLoadingIndicator v-else-if="!isLoaded" />
+			<AniLoader v-else-if="!isLoaded" />
 			<el-empty v-else description="No anime found, please check the username" />
 		</div>
 		<SaveAsImage v-if="true" @click="downloadDialogVisible = true" />

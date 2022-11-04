@@ -22,7 +22,10 @@ export default defineNuxtConfig({
 		},
 	},
 	ssr: false,
-	modules: ["@nuxtjs/tailwindcss"],
+	modules: ["@nuxtjs/tailwindcss", "@pinia/nuxt"],
+	imports: {
+		dirs: ["stores"],
+	},
 	tailwindcss: {
 		// add '~tailwind.config` alias
 		exposeConfig: true,

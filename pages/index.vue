@@ -16,6 +16,7 @@
 </template>
 <script>
 import { ElButton, ElInput, ElSwitch, ElCheckbox, ElSlider } from "element-plus";
+import { mapStores } from "pinia";
 
 export default {
     name: "Homepage",
@@ -34,18 +35,24 @@ export default {
             range: [0,10]
         }
     },
+    computed: {
+        ...mapStores(useStore)
+    },
     methods: {
         enterClicked() {
-            const router = useRouter()
-            let queries = {}
-            if (this.autoSetEntries) queries["auto"] = true;
-            if (this.sequelRank) queries["seasons"] = true;
-            if (this.range[0] != 0) queries["min"] = this.range[0];
-            if (this.range[1] != 10) queries["max"] = this.range[1];
+            const router = useRouter();
 
-            console.log(queries);
+            this.modelStore.options.auto = this.autoSetEntries;
+            if (this.sequelRank) {
+                this.modelStore.options.type = "";
+            } else {
+                this.modelStore.options.type = "PREQUEL";
+            }
+            if (this.range[0] != 0) this.modelStore.options.minScore = this.range[0];
+            if (this.range[1] != 10) this.modelStore.options.maxScore = this.range[1];
+
             if (this.username != "") {
-                router.push({ path: this.username, query: queries });
+                router.push(this.username);
             }
         }
     }

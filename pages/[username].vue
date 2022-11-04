@@ -2,12 +2,12 @@
 	<div class="h-full flex items-center justify-center">
 		<div class="flex flex-col mx-32 px-[30px] min-h-screen max-h-full">
 			<div class="flex flex-row items-end my-[40px] space-x-6">
-				<AniInput label="Search" disabled search clearable v-model="filters.search" />
+				<AniInput label="Search" disabled search clearable v-model.lazy="modelStore.filters.search" />
 				<AniSelect label="Genres" disabled />
-				<AniSelect label="Year" :options="years" v-model="filters.year" />
-				<AniSelect label="Season" :options="seasons" v-model="filters.season" />
-				<AniSelect label="Format" multiple :options="formats" v-model="filters.formats" />
-				<Popover v-if="isLoaded" v-slot="{open}" class="relative grow">
+				<AniSelect label="Year" :options="years" v-model.lazy="modelStore.filters.year" />
+				<AniSelect label="Season" :options="seasons" v-model.lazy="modelStore.filters.season" />
+				<AniSelect label="Format" multiple :options="formats" v-model.lazy="modelStore.filters.formats" />
+				<Popover v-if="modelStore.isLoaded" v-slot="{open}" class="relative grow">
 					<PopoverButton :class="{ 'text-aniPrimary': open }" class="float-right flex items-center justify-center w-[38px] h-[38px] bg-aniWhite focus:outline-0 rounded-[6px] shadow-aniShadow grow shrink">
 						<font-awesome-icon icon="fas fa-sliders-h" :class="[open ? 'text-aniPrimary' : 'text-[#afbfd1]']" class="stroke-2 focus:text-aniPrimary hover:text-aniPrimary" />
 					</PopoverButton>
@@ -24,14 +24,14 @@
 										<el-option label="Linear" :value="1" />
 									</el-select>
 									<div class="flex flex-row items-end grow">
-										<el-button type="primary" class="grow" size="large" @click="setEntries(entries, true)">Auto rank anime</el-button>
-										<el-button type="danger" class="grow" size="large" @click="removeEntries">Unrank all anime</el-button>
+										<el-button type="primary" class="grow" size="large" @click="autoRank">Auto rank anime</el-button>
+										<el-button type="danger" class="grow" size="large" @click="modelStore.removeTiersEntries">Unrank all anime</el-button>
 								
 									</div>
 								</div>
-								<template v-for="(tier, index) in tiers" :key="tier.name">
+								<template v-for="(tier, index) in modelStore.tiers" :key="tier.name">
 									<div class="flex flex-row items-center space-x-6 mb-[10px]">
-										<el-button type="danger" class="aspect-1" size="large" @click="removeTier(index)">
+										<el-button type="danger" class="aspect-1" size="large" @click="modelStore.removeTier(index)">
 											<font-awesome-icon icon="fas fa-trash-alt" />
 										</el-button>
 										<AniInput class="shrink ani-input-tier" background="body" v-model="tier.name" />
@@ -47,25 +47,25 @@
 					</PopoverPanel>
 				</Popover>
 			</div>
-			<div v-if="filters.year != '' || filters.season != '' || filters.formats.length > 0" class="mb-8 flex flex-row items-center">
+			<div v-if="modelStore.getYear != '' || modelStore.getSeason != '' || modelStore.getFormats.length > 0" class="mb-8 flex flex-row items-center">
 				<div class="h-[20px] w-[20px] text-[#afbfd1] mr-[16px]">
 					<svg data-v-cd1dc2b6="" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="tags" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512" class="tags-icon svg-inline--fa fa-tags fa-w-20">
 						<path data-v-cd1dc2b6="" fill="currentColor" d="M497.941 225.941L286.059 14.059A48 48 0 0 0 252.118 0H48C21.49 0 0 21.49 0 48v204.118a48 48 0 0 0 14.059 33.941l211.882 211.882c18.744 18.745 49.136 18.746 67.882 0l204.118-204.118c18.745-18.745 18.745-49.137 0-67.882zM112 160c-26.51 0-48-21.49-48-48s21.49-48 48-48 48 21.49 48 48-21.49 48-48 48zm513.941 133.823L421.823 497.941c-18.745 18.745-49.137 18.745-67.882 0l-.36-.36L527.64 323.522c16.999-16.999 26.36-39.6 26.36-63.64s-9.362-46.641-26.36-63.64L331.397 0h48.721a48 48 0 0 1 33.941 14.059l211.882 211.882c18.745 18.745 18.745 49.137 0 67.882z" class=""></path>
 					</svg>
 				</div>
 				<div class="flex flex-row flex-wrap space-x-4">
-					<el-tag v-if="filters.year != ''" type="primary" closable effect="dark" @close="filters.year =''">{{filters.year}}</el-tag>
-					<el-tag v-if="filters.season != ''" type="primary" closable effect="dark" @close="filters.season =''">{{ filters.season }}</el-tag>
-					<el-tag v-for="format, index in filters.formats" :key="format.value" type="primary" closable effect="dark" @close="removeFilteredFormat(index)">{{ format }}</el-tag>
+					<el-tag v-if="modelStore.filters.year != ''" type="primary" closable effect="dark" @close="modelStore.filters.year =''">{{modelStore.filters.year}}</el-tag>
+					<el-tag v-if="modelStore.filters.season != ''" type="primary" closable effect="dark" @close="modelStore.filters.season =''">{{ modelStore.filters.season }}</el-tag>
+					<el-tag v-for="format, index in modelStore.filters.formats" :key="format.value" type="primary" closable effect="dark" @close="modelStore.removeFilteredFormat(index)">{{ format }}</el-tag>
 				</div>
 			</div>
-			<div v-if="isLoaded && entries.length > 0" id="tierList">
+			<div v-if="modelStore.isLoaded && modelStore.entries.length > 0" id="tierList">
 				<div class="overflow-hidden rounded-[6px]">
-					<tier v-for="tier in tiers" :key="tier.name" :name="tier.name" :color="tier.color" :entries="tier.entries" group="tier" transition :filters="filters" />
+					<Tier v-for="tier in modelStore.tiers" :key="tier.name" :name="tier.name" :color="tier.color" :entries="tier.entries" group="tier" transition :filters="modelStore.filters" />
 				</div>
-				<tier class="mt-8" :entries="unRankedTier" group="tier" transition :filters="filters" />
+				<Tier class="mt-8" :entries="modelStore.unRankedTier" group="tier" transition :filters="modelStore.filters" />
 			</div>
-			<AniLoader v-else-if="!isLoaded" />
+			<AniLoader v-else-if="!modelStore.isLoaded" />
 			<el-empty v-else description="No anime found, please check the username" />
 		</div>
 		<SaveAsImage v-if="true" @click="downloadDialogVisible = true" />
@@ -80,8 +80,11 @@ import draggable from "vuedraggable";
 import { ElButton, ElTag, ElSelect, ElOption, ElDialog, ElEmpty } from "element-plus";
 import { Popover, PopoverButton, PopoverPanel, Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/vue'
 
+import { useStore } from "~~/stores/store";
+import { mapStores } from "pinia";
+
 export default {
-	name: "tierList",
+	name: "TierList",
 	components: {
 		draggable,
 		Popover,
@@ -100,13 +103,6 @@ export default {
 	data() {
 		return {
 			downloadDialogVisible: ref(false),
-			tiers: [],
-			unRankedTier: [],
-			filters: {
-				year: '',
-				season: '',
-				formats: []
-			},
 			templates: [
 				{
 					label: 'logarithmic',
@@ -210,7 +206,6 @@ export default {
 				}
 			],
 			currentTemplate: 0,
-			entries: [],
 			seasons: [
 				{
 					label: 'Winter',
@@ -261,142 +256,52 @@ export default {
 				},
 			],
 			drag: false,
-			isLoaded: false,
 		}
 	},
-	created() {
+	computed: {
+		...mapStores(useStore)
+	},
+	mounted() {
+		const route = useRoute();
+		// if (route.query.seasons != null) this.modelStore.options.type = "";
+		// if (route.query.min != null && route.query.min != 0 && route.query.min < 10) this.modelStore.options.minScore = route.query.min;
+		// if (route.query.max != null && route.query.max != 10 && route.query.max > this.modelStore.options.minScore) this.modelStore.options.maxScore = route.query.max;
+		// this.modelStore.options.auto = route.query.auto != null ? true : false;
+
 		this.changeTiersTemplate(this.templates[this.currentTemplate]);
 		for (let index = new Date().getFullYear(); index >= 1940; index--) {
 			this.years.push({ label: index, value: index });
 		}
-		this.getAllEntries;
+
+		if (this.modelStore.entries.length == 0) {
+			this.modelStore.fetchEntries(route.params.username);
+		}
 	},
 	methods: {
-		removeTier(index) {
-			this.unRankedTier.push(...this.tiers[index].entries);
-			this.tiers.splice(index, 1);
+		autoRank() {
+			this.modelStore.options.auto = false;
+			this.modelStore.setTiersEntries();
 		},
 		addTier() {
-			if (this.tiers.length >= this.templates[this.currentTemplate].value.length) {
+			if (this.modelStore.tiers.length >= this.templates[this.currentTemplate].value.length) {
 				let newTier = {
 					name: 'New tier',
 					color: '#2B2D42',
 					range: [0, 0],
 					entries: []
 				}
-				this.tiers.push(newTier);
+				this.modelStore.tiers.push(newTier);
 			} else {
-				this.tiers.push(this.templates[this.currentTemplate].value[this.tiers.length]);
+				this.modelStore.tiers.push(this.templates[this.currentTemplate].value[this.modelStore.tiers.length]);
 			}
-		},
-		removeEntries() {
-			this.tiers.forEach(tier => {
-				this.unRankedTier.push(...tier.entries);
-				tier.entries = [];
-			})
-		},
-		removeFilteredFormat(index) {
-			this.filters.formats.splice(index, 1);
-		},
-		filterByRelationType(list, type) {
-			return list.filter(entry => !entry.media.relations.edges.some(edge => edge.relationType == type));
-		},
-		filterByScore(list, minScore, maxScore) {
-			return list.filter(entry => entry.score >= minScore && entry.score <= maxScore);
-		},
-		filterByYear(list, year) {
-			return list.filter(entry => entry.media.seasonYear === year);
-		},
-		filterBySeason(list, season) {
-			return list.filter(entry => entry.media.season === season);
-		},
-		filterByFormats(list, formats) {
-			return list.filter(entry => entry.media.formats.formats.some(entryFormat => formats.forEach(selectedFormat => entryFormat == selectedFormat)));
-		},
-		setEntries(list, auto) {
-			list.forEach(entry => {
-				if (entry.score != 0 && auto) {
-					this.tiers.forEach(tier => {
-						if ((entry.score >= tier.range[0] && entry.score <= tier.range[1])) {
-							tier.entries.push(entry);
-						}
-					})
-				} else {
-					this.unRankedTier.push(entry);
-				}
-			});
 		},
 		changeTiersTemplate(template) {
-			if (this.tiers.length > 0) {
-				this.tiers.forEach(tier => this.unRankedTier.push(...tier.entries));
-				this.tiers = [];
+			if (this.modelStore.tiers.length > 0) {
+				this.modelStore.tiers.forEach(tier => this.modelStore.unRankedTier.push(...tier.entries));
+				this.modelStore.tiers = [];
 			}
-			this.tiers = Array.from(template.value);
+			this.modelStore.tiers = Array.from(template.value);
 		}
-	},
-	computed: {
-		async getAllEntries() {
-			var query = `
-				query ($username: String) {
-					MediaListCollection(userName: $username, type: ANIME) {
-						lists {
-							entries {
-								score(format: POINT_10_DECIMAL)
-								media {
-									id
-									title {
-										userPreferred
-									}
-									format
-									season
-									seasonYear
-									genres
-									coverImage {
-										medium
-										large
-									}
-									relations {
-										edges {
-											relationType
-										}
-									}
-									status
-									siteUrl
-								}
-							}
-						}
-					}
-				}
-			`;
-
-			const route = useRoute()
-
-			// Define the config we'll need for our Api request
-			const options = {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-					Accept: "application/json",
-				},
-				body: JSON.stringify({
-					query: query,
-					variables: {
-						username: route.params.username,
-					},
-				}),
-			};
-
-			const response = await fetch("https://graphql.anilist.co", options).then(response => response.json());
-			this.isLoaded = true;
-			let result = response.data.MediaListCollection.lists[0].entries;
-			this.entries = result.sort((a, b) => b.score - a.score);
-			let minScore = 0, maxScore = 10;
-			if (route.query.seasons == null) this.entries = this.filterByRelationType(this.entries, 'PREQUEL');
-			if (route.query.min != null && route.query.min != 0 && route.query.min < 10) minScore = route.query.min;
-			if (route.query.max != null && route.query.max != 10 && route.query.max > minScore) maxScore = route.query.max;
-			this.entries = this.filterByScore(this.entries, minScore, maxScore);
-			this.setEntries(this.entries, route.query.auto != null ? true : false);
-		},
 	},
 };
 </script>

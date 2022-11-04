@@ -13,7 +13,7 @@
 import draggable from "vuedraggable";
 
 export default {
-	name: "tier",
+	name: "Tier",
 	components: {
 		draggable
 	},

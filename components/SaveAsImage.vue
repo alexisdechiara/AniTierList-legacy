@@ -8,7 +8,6 @@
 import { ElButton } from 'element-plus';
 import { Download } from '@element-plus/icons-vue';
 import html2canvas from 'html2canvas';
-import FileSaver from 'file-saver';
 
 function saveAsPng() {
   html2canvas(document.getElementById("tierList"), {

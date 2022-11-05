@@ -1,7 +1,7 @@
 <template>
 	<Popover v-slot="{ open }" class="relative">
 		<PopoverButton class="flex items-center justify-center w-[40px] aspect-1 bg-aniBody focus:outline-0 rounded-[6px] focus:shadow-aniShadowButton" @click="showColorPicker = !open">
-			<font-awesome-icon class="w-[18px] h-[18px]" icon="fas fa-eye-dropper" :style="'fill:' + color" />
+			<font-awesome-icon icon="fas fa-swatchbook" class="w-[18px] h-[18px]" :style="{ 'color': color }" />
 		</PopoverButton>
 
 		<PopoverPanel class="absolute left-[50px] top-0 z-20">

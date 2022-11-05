@@ -34,6 +34,7 @@
 		"unplugin-element-plus": "^0.4.1",
 		"unplugin-vue-components": "^0.22.8",
 		"vue-color-kit": "^1.0.5",
+		"vue-contenteditable": "^4.1.0",
 		"vue-tailwind-color-picker": "^1.0.6",
 		"vuedraggable": "^4.1.0",
 		"yarn": "^1.22.19"

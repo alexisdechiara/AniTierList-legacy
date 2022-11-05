@@ -1,9 +1,9 @@
 <template>
 	<div class="flex flex-row min-h-[150px]">
-		<div v-if="name != null" :style="'background-color:' + color" class="flex basis-auto min-h-[150px] min-w-[150px] max-w-fit text-white text-center justify-center items-center font-bold text-5xl">{{ name }}</div>
+		<contenteditable @dblclick="isEditable = true" @focusout="isEditable = false" tag="div" :contenteditable="isEditable" v-model="name" :no-nl="true" :no-html="true" @returned="enterPressed" v-if="name != null" :style="'background-color:' + color" class="flex break-word basis-auto min-h-[150px] w-[200px] text-white text-center justify-center items-center font-bold text-3xl" />
 		<draggable class="flex flex-wrap flex-row w-full" :group="group" :list="entries" item-key="media.id">
 			<template #item="{ element }">
-				<img v-show="checkYear(element.media.seasonYear) && checkSeason(element.media.season) && checkFormat(element.media.format)" class="flex aspect-[2/3] object-cover h-[150px]" :src="element.media.coverImage.medium" alt="">
+				<img v-show="checkTitle(element.media.title) && checkYear(element.media.seasonYear) && checkSeason(element.media.season) && checkFormat(element.media.format) && checkGenre(element.media.genres)" class="flex aspect-[2/3] object-cover h-[150px]" :src="element.media.coverImage.medium" alt="">
 			</template>
 		</draggable>
 	</div>
@@ -11,11 +11,18 @@
 
 <script>
 import draggable from "vuedraggable";
+import contenteditable from 'vue-contenteditable';
 
 export default {
 	name: "Tier",
 	components: {
-		draggable
+		draggable,
+		contenteditable
+	},
+	data() {
+		return {
+			isEditable: false
+		}
 	},
 	props: {
 		name: String,
@@ -26,6 +33,9 @@ export default {
 		filters: Object,
 	},
 	methods: {
+		enterPressed() {
+			this.$emit('update:name', this.name)
+		},
 		checkYear(year) {
 			if (this.filters.year != '') {
 				return year == this.filters.year;
@@ -39,6 +49,24 @@ export default {
 		checkFormat(format) {
 			if (this.filters.formats.length > 0) {
 				return this.filters.formats.some(FilteredFormat => FilteredFormat == format);
+			} else return true
+		},
+		checkGenre(genres) {
+			if (this.filters.genres.length > 0) {
+				return this.filters.genres.every(e => genres.includes(e));
+			} else return true
+		},
+		checkTitle(title) {
+			if (this.filters.search != '') {
+				let result = false;
+				for (const key in title) {
+					if (title[key] != null) {
+						if (title[key].toLowerCase().includes(this.filters.search)) {
+							result = true;
+						}
+					}
+				}
+				return result;
 			} else return true
 		}
 	},

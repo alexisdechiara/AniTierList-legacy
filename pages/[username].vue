@@ -2,11 +2,11 @@
 	<div class="h-full flex items-center justify-center">
 		<div class="flex flex-col mx-32 px-[30px] min-h-screen max-h-full">
 			<div class="flex flex-row items-end my-[40px] space-x-6">
-				<AniInput label="Search" disabled search clearable v-model="filters.search" />
-				<AniSelect label="Genres" disabled />
-				<AniSelect label="Year" :options="years" v-model="filters.year" />
-				<AniSelect label="Season" :options="seasons" v-model="filters.season" />
-				<AniSelect label="Format" multiple :options="formats" v-model="filters.formats" />
+				<AniInput label="Search" search clearable v-model.lazy="filters.search" />
+				<AniSelect label="Genres" multiple :options="genres" v-model.lazy="filters.genres" />
+				<AniSelect label="Year" :options="years" v-model.lazy="filters.year" />
+				<AniSelect label="Season" :options="seasons" v-model.lazy="filters.season" />
+				<AniSelect label="Format" multiple :options="formats" v-model.lazy="filters.formats" />
 				<Popover v-if="isLoaded" v-slot="{open}" class="relative grow">
 					<PopoverButton :class="{ 'text-aniPrimary': open }" class="float-right flex items-center justify-center w-[38px] h-[38px] bg-aniWhite focus:outline-0 rounded-[6px] shadow-aniShadow grow shrink">
 						<font-awesome-icon icon="fas fa-sliders-h" :class="[open ? 'text-aniPrimary' : 'text-[#afbfd1]']" class="stroke-2 focus:text-aniPrimary hover:text-aniPrimary" />
@@ -24,9 +24,8 @@
 										<el-option label="Linear" :value="1" />
 									</el-select>
 									<div class="flex flex-row items-end grow">
-										<el-button type="primary" class="grow" size="large" @click="setEntries(entries, true)">Auto rank anime</el-button>
-										<el-button type="danger" class="grow" size="large" @click="removeEntries">Unrank all anime</el-button>
-								
+										<el-button type="primary" class="grow" size="large" @click="[removeAllTiersEntries(),setEntries(entries, true)]">Auto rank anime</el-button>
+										<el-button type="danger" class="grow" size="large" @click="removeTiersEntries()">Unrank all anime</el-button>
 									</div>
 								</div>
 								<template v-for="(tier, index) in tiers" :key="tier.name">
@@ -46,22 +45,20 @@
 						</Disclosure>
 					</PopoverPanel>
 				</Popover>
-			</div>
-			<div v-if="filters.year != '' || filters.season != '' || filters.formats.length > 0" class="mb-8 flex flex-row items-center">
-				<div class="h-[20px] w-[20px] text-[#afbfd1] mr-[16px]">
-					<svg data-v-cd1dc2b6="" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="tags" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512" class="tags-icon svg-inline--fa fa-tags fa-w-20">
-						<path data-v-cd1dc2b6="" fill="currentColor" d="M497.941 225.941L286.059 14.059A48 48 0 0 0 252.118 0H48C21.49 0 0 21.49 0 48v204.118a48 48 0 0 0 14.059 33.941l211.882 211.882c18.744 18.745 49.136 18.746 67.882 0l204.118-204.118c18.745-18.745 18.745-49.137 0-67.882zM112 160c-26.51 0-48-21.49-48-48s21.49-48 48-48 48 21.49 48 48-21.49 48-48 48zm513.941 133.823L421.823 497.941c-18.745 18.745-49.137 18.745-67.882 0l-.36-.36L527.64 323.522c16.999-16.999 26.36-39.6 26.36-63.64s-9.362-46.641-26.36-63.64L331.397 0h48.721a48 48 0 0 1 33.941 14.059l211.882 211.882c18.745 18.745 18.745 49.137 0 67.882z" class=""></path>
-					</svg>
 				</div>
+				<div v-if="filters.search != '' || filters.year != '' || filters.season != '' || filters.formats.length > 0 || filters.genres.length > 0" class="mb-8 flex flex-row items-center">
+					<font-awesome-icon icon="fas fa-tags" class="h-[20px] w-[20px] text-[#afbfd1] mr-[16px]" />
 				<div class="flex flex-row flex-wrap space-x-4">
+					<el-tag v-if="filters.search != ''" type="primary" closable effect="dark" @close="filters.search =''">{{filters.search}}</el-tag>
 					<el-tag v-if="filters.year != ''" type="primary" closable effect="dark" @close="filters.year =''">{{filters.year}}</el-tag>
 					<el-tag v-if="filters.season != ''" type="primary" closable effect="dark" @close="filters.season =''">{{ filters.season }}</el-tag>
 					<el-tag v-for="format, index in filters.formats" :key="format.value" type="primary" closable effect="dark" @close="removeFilteredFormat(index)">{{ format }}</el-tag>
+					<el-tag v-for="genre, index in filters.genres" :key="genre.value" type="primary" closable effect="dark" @close="removeFilteredFormat(index)">{{ genre }}</el-tag>
 				</div>
 			</div>
 			<div v-if="isLoaded && entries.length > 0" id="tierList">
 				<div class="overflow-hidden rounded-[6px]">
-					<tier v-for="tier in tiers" :key="tier.name" :name="tier.name" :color="tier.color" :entries="tier.entries" group="tier" transition :filters="filters" />
+					<tier v-for="tier in tiers" :key="tier.name" v-model="tier.name" :name="tier.name" :color="tier.color" :entries="tier.entries" group="tier" transition :filters="filters" />
 				</div>
 				<tier class="mt-8" :entries="unRankedTier" group="tier" transition :filters="filters" />
 			</div>
@@ -103,6 +100,8 @@ export default {
 			tiers: [],
 			unRankedTier: [],
 			filters: {
+				search: '',
+				genres: [],
 				year: '',
 				season: '',
 				formats: []
@@ -138,7 +137,7 @@ export default {
 						{
 							name: 'C',
 							color: '#67aeed',
-							range: [8, 8.5],
+							range: [8, 8.4],
 							entries: []
 						},
 						{
@@ -229,6 +228,7 @@ export default {
 					value: 'FALL'
 				}
 			],
+			genres: [],
 			years: [],
 			formats: [
 				{
@@ -266,10 +266,14 @@ export default {
 	},
 	created() {
 		this.changeTiersTemplate(this.templates[this.currentTemplate]);
+		this.getAllEntries;
 		for (let index = new Date().getFullYear(); index >= 1940; index--) {
 			this.years.push({ label: index, value: index });
 		}
-		this.getAllEntries;
+		let genresTemplate = ["Action", "Adventure", "Comedy", "Drama", "Ecchi", "Fantasy", "Horror", "Mahou Shoujo", "Mecha", "Music", "Mystery", "Psychological", "Romance", "Sci-Fi", "Slice of Life", "Sports", "Supernatural", "Thriller", "4-koma", "Achromatic", "Achronological Order", "Acting", "Adoption", "Advertisement", "Afterlife", "Age Gap", "Age Regression", "Agender", "Agriculture", "Airsoft", "Alchemy", "Aliens", "Alternate Universe", "American Football", "Amnesia", "Anachronism", "Angels", "Animals", "Anthology", "Anthropomorphism", "Anti-Hero", "Archery", "Artificial Intelligence", "Asexual", "Assassins", "Astronomy", "Athletics", "Augmented Reality", "Autobiographical", "Aviation", "Badminton", "Band", "Bar", "Baseball", "Basketball", "Battle Royale", "Biographical", "Bisexual", "Body Horror", "Body Swapping", "Boxing", "Boys' Love", "Bullying", "Butler", "Calligraphy", "Cannibalism", "Card Battle", "Cars", "Centaur", "CGI", "Cheerleading", "Chibi", "Chimera", "Chuunibyou", "Circus", "Classic Literature", "Clone", "College", "Coming of Age", "Conspiracy", "Cosmic Horror", "Cosplay", "Crime", "Crossdressing", "Crossover", "Cult", "Cultivation", "Cute Boys Doing Cute Things", "Cute Girls Doing Cute Things", "Cyberpunk", "Cyborg", "Cycling", "Dancing", "Death Game", "Delinquents", "Demons", "Denpa", "Detective", "Dinosaurs", "Disability", "Dissociative Identities", "Dragons", "Drawing", "Drugs", "Dullahan", "Dungeon", "Dystopian", "E-Sports", "Economics", "Educational", "Elf", "Ensemble Cast", "Environmental", "Episodic", "Ero Guro", "Espionage", "Fairy Tale", "Family Life", "Fashion", "Female Harem", "Female Protagonist", "Fencing", "Firefighters", "Fishing", "Fitness", "Flash", "Food", "Football", "Foreign", "Found Family", "Fugitive", "Full CGI", "Full Color", "Gambling", "Gangs", "Gender Bending", "Ghost", "Go", "Goblin", "Gods", "Golf", "Gore", "Guns", "Gyaru", "Handball", "Henshin", "Heterosexual", "Hikikomori", "Historical", "Homeless", "Ice Skating", "Idol", "Impersonation", "Isekai", "Iyashikei", "Josei", "Judo", "Kaiju", "Karuta", "Kemonomimi", "Kids", "Kuudere", "Lacrosse", "Language Barrier", "LGBTQ+ Themes", "Lost Civilization", "Love Triangle", "Mafia", "Magic", "Mahjong", "Maids", "Makeup", "Male Harem", "Male Protagonist", "Martial Arts", "Medicine", "Memory Manipulation", "Mermaid", "Meta", "Military", "Mixed Gender Harem", "Monster Boy", "Monster Girl", "Mopeds", "Motorcycles", "Musical", "Mythology", "Necromancy", "Nekomimi", "Ninja", "No Dialogue", "Noir", "Non-fiction", "Nudity", "Nun", "Office Lady", "Oiran", "Ojou-sama", "Orphan", "Otaku Culture", "Outdoor", "Pandemic", "Parkour", "Parody", "Philosophy", "Photography", "Pirates", "Poker", "Police", "Politics", "Post-Apocalyptic", "POV", "Primarily Adult Cast", "Primarily Child Cast", "Primarily Female Cast", "Primarily Male Cast", "Primarily Teen Cast", "Puppetry", "Rakugo", "Real Robot", "Rehabilitation", "Reincarnation", "Religion", "Revenge", "Robots", "Rotoscoping", "Rugby", "Rural", "Samurai", "Satire", "School", "School Club", "Scuba Diving", "Seinen", "Shapeshifting", "Ships", "Shogi", "Shoujo", "Shounen", "Shrine Maiden", "Skateboarding", "Skeleton", "Slapstick", "Slavery", "Software Development", "Space", "Space Opera", "Spearplay", "Steampunk", "Stop Motion", "Succubus", "Suicide", "Sumo", "Super Power", "Super Robot", "Superhero", "Surfing", "Surreal Comedy", "Survival", "Swimming", "Swordplay", "Table Tennis", "Tanks", "Tanned Skin", "Teacher", "Teens' Love", "Tennis", "Terrorism", "Time Manipulation", "Time Skip", "Tokusatsu", "Tomboy", "Torture", "Tragedy", "Trains", "Transgender", "Travel", "Triads", "Tsundere", "Twins", "Urban", "Urban Fantasy", "Vampire", "Video Games", "Vikings", "Villainess", "Virtual World", "Volleyball", "VTuber", "War", "Werewolf", "Witch", "Work", "Wrestling", "Writing", "Wuxia", "Yakuza", "Yandere", "Youkai", "Yuri", "Zombie"]
+		genresTemplate.forEach(element => {
+			this.genres.push({ label: element, value: element })
+		})
 	},
 	methods: {
 		removeTier(index) {
@@ -289,14 +293,24 @@ export default {
 				this.tiers.push(this.templates[this.currentTemplate].value[this.tiers.length]);
 			}
 		},
-		removeEntries() {
+		removeTiersEntries() {
 			this.tiers.forEach(tier => {
 				this.unRankedTier.push(...tier.entries);
 				tier.entries = [];
 			})
 		},
+		removeUnrankedTierEntries() {
+			this.unRankedTier = [];
+		},
+		removeAllTiersEntries() {
+			this.removeTiersEntries();
+			this.removeUnrankedTierEntries();
+		},
 		removeFilteredFormat(index) {
 			this.filters.formats.splice(index, 1);
+		},
+		removeFilteredFormat(index) {
+			this.filters.genres.splice(index, 1);
 		},
 		filterByRelationType(list, type) {
 			return list.filter(entry => !entry.media.relations.edges.some(edge => edge.relationType == type));
@@ -328,7 +342,7 @@ export default {
 		},
 		changeTiersTemplate(template) {
 			if (this.tiers.length > 0) {
-				this.tiers.forEach(tier => this.unRankedTier.push(...tier.entries));
+				this.removeTiersEntries();
 				this.tiers = [];
 			}
 			this.tiers = Array.from(template.value);
@@ -345,6 +359,8 @@ export default {
 								media {
 									id
 									title {
+										romaji
+										english
 										userPreferred
 									}
 									format
@@ -353,7 +369,6 @@ export default {
 									genres
 									coverImage {
 										medium
-										large
 									}
 									relations {
 										edges {

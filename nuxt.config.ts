@@ -22,7 +22,7 @@ export default defineNuxtConfig({
 		},
 	},
 	ssr: false,
-	modules: ["@nuxtjs/tailwindcss"],
+	modules: ["@nuxtjs/tailwindcss", "@nuxt/content"],
 	tailwindcss: {
 		// add '~tailwind.config` alias
 		exposeConfig: true,

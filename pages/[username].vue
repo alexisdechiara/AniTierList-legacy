@@ -82,7 +82,9 @@ export default {
 				genres: [],
 				year: '',
 				season: '',
-				formats: []
+				formats: [],
+				seasons: false,
+				range: [0, 10],
 			},
 			years: [],
 			seasons: data.seasons,
@@ -137,21 +139,6 @@ export default {
 		removeAllTiersEntries() {
 			this.removeTiersEntries();
 			this.removeUnrankedTierEntries();
-		},
-		filterByRelationType(list, type) {
-			return list.filter(entry => !entry.media.relations.edges.some(edge => edge.relationType == type));
-		},
-		filterByScore(list, minScore, maxScore) {
-			return list.filter(entry => entry.score >= minScore && entry.score <= maxScore);
-		},
-		filterByYear(list, year) {
-			return list.filter(entry => entry.media.seasonYear === year);
-		},
-		filterBySeason(list, season) {
-			return list.filter(entry => entry.media.season === season);
-		},
-		filterByFormats(list, formats) {
-			return list.filter(entry => entry.media.formats.formats.some(entryFormat => formats.forEach(selectedFormat => entryFormat == selectedFormat)));
 		},
 		setEntries(list) {
 			list.forEach(entry => {
@@ -234,12 +221,10 @@ export default {
 			this.isLoaded = true;
 			let result = response.data.MediaListCollection.lists[0].entries;
 			this.entries = result.sort((a, b) => b.score - a.score);
-			let minScore = 0, maxScore = 10;
-			if (route.query.seasons == null) this.entries = this.filterByRelationType(this.entries, 'PREQUEL');
-			if (route.query.min != null && route.query.min != 0 && route.query.min < 10) minScore = route.query.min;
-			if (route.query.max != null && route.query.max != 10 && route.query.max > minScore) maxScore = route.query.max;
-			this.entries = this.filterByScore(this.entries, minScore, maxScore);
-			this.autoRank = route.query.auto != null ? true : false
+			if (route.query.seasons != null) this.filters.seasons = true;
+			if (route.query.min != null && route.query.min != 0 && route.query.min <= 10) this.filters.range[0] = route.query.min;
+			if (route.query.max != null && route.query.max != 10 && route.query.max >= this.filters.range[0]) this.filters.range[1] = route.query.max;
+			this.autoRank = route.query.auto != null ? true : false;
 			this.setEntries(this.entries);
 		},
 	},

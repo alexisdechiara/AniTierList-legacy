@@ -3,7 +3,7 @@
 		<contenteditable @dblclick="isEditable = true" @focusout="isEditable = false" tag="div" :contenteditable="isEditable" v-model="name" :no-nl="true" :no-html="true" @returned="enterPressed" v-if="name != null" :style="'background-color:' + color" class="flex break-word basis-auto min-h-[150px] w-[200px] text-white text-center justify-center items-center font-bold text-3xl" />
 		<draggable class="flex flex-wrap flex-row w-full" :group="group" :list="entries" item-key="media.id">
 			<template #item="{ element }">
-				<img v-show="checkTitle(element.media.title) && checkYear(element.media.seasonYear) && checkSeason(element.media.season) && checkFormat(element.media.format) && checkGenre(element.media.genres)" class="flex aspect-[2/3] object-cover h-[150px]" :src="element.media.coverImage.medium" alt="">
+				<img v-show="checkAll(element)" class="flex aspect-[2/3] object-cover h-[150px]" :src="element.media.coverImage.medium" alt="">
 			</template>
 		</draggable>
 	</div>
@@ -35,6 +35,17 @@ export default {
 	methods: {
 		enterPressed() {
 			this.$emit('update:name', this.name)
+		},
+		checkAll(element) {
+			return (
+				this.checkTitle(element.media.title) &&
+				this.checkYear(element.media.seasonYear) &&
+				this.checkSeason(element.media.season) &&
+				this.checkFormat(element.media.format) &&
+				this.checkGenre(element.media.genres) &&
+				this.checkScore(element.score) &&
+				this.checkIsSequel(element.media.relations.edges)
+			)
 		},
 		checkYear(year) {
 			if (this.filters.year != '') {
@@ -68,6 +79,18 @@ export default {
 				}
 				return result;
 			} else return true
+		},
+		checkScore(score) {
+			if (score != 0) {
+				return this.filters.range[0] <= score && score <= this.filters.range[1];
+			} else return false
+		},
+		checkIsSequel(edges) {
+			if (this.filters.seasons === false) {
+				return !edges.some(edge => edge.relationType == 'PREQUEL');
+			} else {
+				return true;
+			}
 		}
 	},
 	computed: {

@@ -7,6 +7,7 @@ export default defineNuxtConfig({
 			charset: "utf-8",
 			title: "AniTierList",
 			meta: [{ name: "description", content: "Unofficial Anilist tierlist maker" }],
+			script: [{ type: "text/javascript", src: "node_modules/default-passive-events/dist/index.js" }],
 			link: [
 				{
 					rel: "stylesheet",

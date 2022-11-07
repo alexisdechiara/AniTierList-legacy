@@ -24,6 +24,7 @@
 		"@tailwindcss/forms": "^0.5.3",
 		"add": "^2.0.6",
 		"autoprefixer": "^10.4.12",
+		"default-passive-events": "^2.0.0",
 		"element-plus": "^2.2.19",
 		"graphql": "^16.6.0",
 		"html2canvas": "^1.4.1",

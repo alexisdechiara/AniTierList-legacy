@@ -7,46 +7,37 @@
 				<AniSelect label="Year" :options="years" v-model.lazy="filters.year" />
 				<AniSelect label="Season" :options="seasons" v-model.lazy="filters.season" />
 				<AniSelect label="Format" multiple :options="formats" v-model.lazy="filters.formats" />
-				<Popover v-if="isLoaded" v-slot="{open}" class="relative grow">
-					<PopoverButton :class="{ 'text-aniPrimary': open }" class="float-right flex items-center justify-center w-[38px] h-[38px] bg-aniWhite focus:outline-0 rounded-[6px] shadow-aniShadow grow shrink">
-						<font-awesome-icon icon="fas fa-sliders-h" :class="[open ? 'text-aniPrimary' : 'text-[#afbfd1]']" class="stroke-2 focus:text-aniPrimary hover:text-aniPrimary" />
-					</PopoverButton>
-					<transition enter-active-class="transition duration-200 ease-out" enter-from-class="translate-y-1 opacity-0" enter-to-class="translate-y-0 opacity-100" leave-active-class="transition duration-150 ease-in" leave-from-class="translate-y-0 opacity-100" leave-to-class="translate-y-1 opacity-0">
-						<PopoverPanel class="flex flex-col absolute right-0 top-10 z-10 p-[40px] bg-aniWhite mt-[10px] rounded-[10px] shadow-aniShadow w-[800px]">
-							<Disclosure :defaultOpen="true" v-slot="{ open }">
-								<DisclosureButton class="flex flex-row pt-[15px] items-center font-semibold mb-[15px]">
-									<font-awesome-icon icon="fa-chevron-right fa-w-10 fa-fw" class="text-[12px] text-[#adc0d2] -ml-[2px] mr-[6px] transition duration-150 ease-in transform" :class="[open ? 'rotate-90' : 'rotate-0']" />
-									<span class="font-[overpass] text-[16px] text-[#516170]">Tierlist settings</span>
-								</DisclosureButton>
-								<DisclosurePanel>
-									<div class="flex flex-row mb-[30px] items-end space-x-6">
-										<el-select class="ani-select-template" v-model="currentTemplate" @change="changeTiersTemplate(templates[currentTemplate])" placeholder="Template">
-											<el-option label="Logarithmic" :value="0" />
-											<el-option label="Linear" :value="1" />
-										</el-select>
-										<div class="flex flex-row items-end grow">
-											<el-button type="primary" class="grow" size="large" @click="[removeAllTiersEntries(),autoRank = true,setEntries(entries)]">Auto rank anime</el-button>
-											<el-button type="danger" class="grow" size="large" @click="[autoRank = false,removeTiersEntries()]">Unrank all anime</el-button>
-										</div>
-									</div>
-									<template v-for="(tier, index) in tiers" :key="tier.name">
-										<div class="flex flex-row items-center space-x-6 mb-[10px]">
-											<el-button type="danger" class="aspect-1" size="large" @click="removeTier(index)">
-												<font-awesome-icon icon="fas fa-trash-alt" />
-											</el-button>
-											<AniInput class="shrink ani-input-tier" background="body" v-model="tier.name" />
-											<AniColorPicker v-model="tier.color" />
-											<AniMultiRangeSlider class="grow" v-model="tier.range" />
-										</div>
-									</template>
-									<el-button type="primary" class="w-full mt-[15px]" size="large" text bg @click="addTier">
-										<font-awesome-icon icon="fas fa-plus" />
-									</el-button>
-								</DisclosurePanel>
-							</Disclosure>
-						</PopoverPanel>
-					</transition>
-				</Popover>
+				<div class="relative grow">
+					<el-button class="float-right aspect-1 w-[40px] hover:text-aniPrimary focus:bg-aniWhite" size="large" color="#fafafa" @click="isOpen = !isOpen">
+						<font-awesome-icon icon="fas fa-sliders-h" :class="[isOpen ? 'text-aniPrimary' : 'text-[#afbfd1]']" class="stroke-2 focus:text-aniPrimary hover:text-aniPrimary" />
+					</el-button>
+					<div v-show="isOpen" class="fixed inset-0 z-0" @click="isOpen = !isOpen" />
+					<div v-show="isOpen" class="flex flex-col absolute right-0 top-10 z-10 p-[40px] bg-aniWhite mt-[10px] rounded-[10px] shadow-aniShadow w-[800px]">
+						<div class="flex flex-row mb-[30px] items-end space-x-6">
+							<el-select class="ani-select-template" v-model="currentTemplate" @change="changeTiersTemplate(templates[currentTemplate])" placeholder="Template">
+								<el-option label="Logarithmic" :value="0" />
+								<el-option label="Linear" :value="1" />
+							</el-select>
+							<div class="flex flex-row items-end grow">
+								<el-button type="primary" class="grow" size="large" @click="[removeAllTiersEntries(),autoRank = true,setEntries(entries)]">Auto rank anime</el-button>
+								<el-button type="danger" class="grow" size="large" @click="[autoRank = false,removeTiersEntries()]">Unrank all anime</el-button>
+							</div>
+						</div>
+						<template v-for="(tier, index) in tiers" :key="tier.name">
+							<div class="flex flex-row items-center space-x-6 mb-[10px]">
+								<el-button type="danger" class="aspect-1" size="large" @click="removeTier(index)">
+									<font-awesome-icon icon="fas fa-trash-alt" />
+								</el-button>
+								<AniInput class="shrink ani-input-tier" background="body" v-model="tier.name" />
+								<AniColorPicker v-model="tier.color" />
+								<AniMultiRangeSlider class="grow" v-model="tier.range" />
+							</div>
+						</template>
+						<el-button type="primary" class="w-full mt-[15px]" size="large" text bg @click="addTier">
+							<font-awesome-icon icon="fas fa-plus" />
+						</el-button>
+					</div>
+				</div>
 				</div>
 			<AniTags v-model="filters" />
 			<div v-if="isLoaded && entries.length > 0" id="tierList">
@@ -68,7 +59,6 @@
 <script>
 import draggable from "vuedraggable";
 import { ElButton, ElSelect, ElOption, ElDialog, ElEmpty } from "element-plus";
-import { Popover, PopoverButton, PopoverPanel, Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/vue'
 import data from '../content/data.json'
 import templatesJSON from '../content/templates.json'
 
@@ -76,12 +66,6 @@ export default {
 	name: "tierList",
 	components: {
 		draggable,
-		Popover,
-		PopoverButton,
-		Disclosure,
-		DisclosureButton,
-		DisclosurePanel,
-		PopoverPanel,
 		ElSelect,
 		ElOption,
 		ElButton,
@@ -110,6 +94,7 @@ export default {
 			drag: false,
 			isLoaded: false,
 			autoRank: false,
+			isOpen: false
 		}
 	},
 	created() {
